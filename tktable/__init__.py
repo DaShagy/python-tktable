@@ -1,8 +1,9 @@
 from tkinter import *
+import numbers
 
 class Table():
     def __init__(self, master, row=4, col=4):
-        
+
         self._master = master
         self._row_number = row
         self._col_number = col
@@ -118,18 +119,30 @@ class Table():
             pass
 
 class Cell(Entry):
-    def __init__(self, master, col=0, row=0):
+    def __init__(self, master, value="", posx=0, posy=0):
         self._root = master
         Entry.__init__(self, self._root)
-        self.grid(column=col, row=row)
-        self.config(state="readonly", readonlybackground="white", cursor="arrow")
+        self._value = StringVar()
 
+        self.grid(column=posx, row=posy)
+        self.config(state="readonly", readonlybackground="white", textvariable=self._value, cursor="arrow")
 
     def focus_cell(self):
         self.config(readonlybackground="lightblue")
 
     def unfocus_cell(self):
         self.config(readonlybackground="white")
+
+    def set_value(self, value):
+        if isinstance(value, numbers.Number):         
+            self.config(justify=RIGHT)
+        else:
+            self.config(justify=LEFT)
+        self._value.set(value)
+
+    def get_value(self):
+        return self._value.get()
+
 
 class Cell_Line():
     def __init__(self, master, len):
@@ -139,7 +152,7 @@ class Cell_Line():
 
     def create_cells(self, i):
         for n in range(self._length):
-            cell = Cell(self._root, n, i)
+            cell = Cell(self._root, posx=n, posy=i)
             self._cells.append(cell)
 
     def get_cells(self):
@@ -173,9 +186,11 @@ def _test():
     frame = Frame(root, padx=10, pady=10)
     table = Table(frame)
     frame.pack()
-    text = StringVar()
-    table.cols[0]._cells[0].config(text=text)
-    text.set("Abuin")
+    cell = table.cols[0]._cells[0]
+    cell.set_value(47)
+
+    print(cell.get_value())
+
 
     #print(table.get_column(0).get_cell(3))
 
