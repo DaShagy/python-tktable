@@ -43,20 +43,21 @@ class Table():
         self.create_rows()
         self.create_columns()
 
-    def get_row(self, row):
-        try:
-            return self.rows[row]
-        except:
-            pass
+    def get_cell_line(self, row, col):
+        if 0 <= row < self._row_number and 0 <= col < self._col_number:
+            return self.rows[row], self.cols[col]
 
-    def get_column(self, col):
-        try:
-            return self.cols[col]
-        except:
-            pass
+
+    def get_row(self, row, col):
+        r, _ = self.get_cell_line(row, col)
+        return r
+
+    def get_column(self, row, col):
+        _, c = self.get_cell_line(row, col)
+        return c
 
     def get_cell(self, row, col):
-        return self.rows[row].get_cell(col)
+        return self.get_row(row, col).get_cell(col)
 
     def find_widget(self, event):
         x = event.x_root - self._master.winfo_rootx() 
@@ -69,8 +70,8 @@ class Table():
         return self.get_cell(row, col)
 
     def find_row(self, event):
-        row, _ = self.find_widget(event)
-        return self.get_row(row)
+        row, col = self.find_widget(event)
+        return self.get_row(row, col)
 
     def focus_selected_cell(self, cell):
         self.selected_cell = cell
@@ -183,11 +184,14 @@ class Column(Cell_Line):
 
 def _test():
     root = Tk()
+    root.title("Test")
     frame = Frame(root, padx=10, pady=10)
     table = Table(frame)
     frame.pack()
-    cell = table.cols[0]._cells[0]
+    cell = table.get_cell(0,0)
+    cell2 = table.get_cell(0,1)
     cell.set_value(47)
+    cell2.set_value("Galo")
 
     print(cell.get_value())
 
