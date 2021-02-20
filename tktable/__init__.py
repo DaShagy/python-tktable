@@ -2,9 +2,10 @@ from tkinter import *
 import numbers
 
 class Table():
-    def __init__(self, master, row=4, col=4):
+    def __init__(self, master, col=4, row=4):
 
         self._master = master
+
         self._row_number = row
         self._col_number = col
 
@@ -13,7 +14,7 @@ class Table():
 
         self.selected_cell = None
         self.selected_row = None
-        
+
         self.bind_mouse_button()
         self.create_table()
 
@@ -32,11 +33,10 @@ class Table():
     def create_columns(self):
         for col in range(self._col_number):
             c = Column(self._master, self._row_number, col)
-            if col % self._col_number == 0:
-                for row in range(self._row_number):
-                    temp_row = self.rows[row]
-                    cell = temp_row.get_cells()[col]
-                    c._cells.append(cell)
+            for row in range(self._row_number):
+                temp_row = self.rows[row]
+                cell = temp_row.get_cell(col)
+                c._cells.append(cell)       
             self.cols.append(c)
 
     def create_table(self):
@@ -46,7 +46,6 @@ class Table():
     def get_cell_line(self, row, col):
         if 0 <= row < self._row_number and 0 <= col < self._col_number:
             return self.rows[row], self.cols[col]
-
 
     def get_row(self, row, col):
         r, _ = self.get_cell_line(row, col)
@@ -119,14 +118,48 @@ class Table():
         except:
             pass
 
+    #TODO: Simplefy and generalize 'insert_headers'
+    #############################
+
+    def insert_headers(self, data):
+        headers = [*data.keys()]
+        print(headers)
+        header_row = self.get_row(0, 0)
+        for cell, key in zip(header_row.get_cells(), headers):
+            cell.set_value(key)
+
+    ##############################
+
+    def insert_row(self):
+        new_row = Row(self._master, len(self.cols), self._row_number)
+        self.rows.append(new_row)
+        for col, cell in zip(self.cols, new_row.get_cells()):
+            col.get_cells().append(cell)
+        self._row_number += 1
+
+
+    #TODO: Implement insert columns
+
+    '''
+
+    def insert_col(self):
+        new_col = Column(self._master, len(self.rows), self._col_number)
+        self.cols.append(new_col)
+        for row, cell in zip(self.rows, new_col.get_cells()):
+            row.get_cells().append(cell)
+        self._col_number += 1
+
+    '''
+
 class Cell(Entry):
-    def __init__(self, master, value="", posx=0, posy=0):
+    def __init__(self, master, posx=0, posy=0):
         self._root = master
         Entry.__init__(self, self._root)
         self._value = StringVar()
 
         self.grid(column=posx, row=posy)
         self.config(state="readonly", readonlybackground="white", textvariable=self._value, cursor="arrow")
+        self.set_value(f"{posx},{posy}")
 
     def focus_cell(self):
         self.config(readonlybackground="lightblue")
@@ -183,18 +216,17 @@ class Column(Cell_Line):
 #Test
 
 def _test():
+    d = {"Name": "Juan", "Age": 24}
     root = Tk()
     root.title("Test")
     frame = Frame(root, padx=10, pady=10)
     table = Table(frame)
+    table.insert_row()
+    #table.insert_col()
+    #table.insert_row()
     frame.pack()
-    cell = table.get_cell(0,0)
-    cell2 = table.get_cell(0,1)
-    cell.set_value(47)
-    cell2.set_value("Galo")
 
-    print(cell.get_value())
-
+    
 
     #print(table.get_column(0).get_cell(3))
 
