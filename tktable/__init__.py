@@ -5,6 +5,10 @@ import numbers
 
 class Table():
     def __init__(self, master, col=4, row=4):
+        '''
+        Create a table instance, passing it master (a tkinter Frame), number of columns and number of rows
+        as arguments
+        '''
 
         self._master = master
 
@@ -23,32 +27,50 @@ class Table():
         return f"Rows: {self._row_number}, Cols: {self._col_number}\n{self.cells}"
 
     def bind_mouse_button(self):
+        '''
+        Bind mouse input on select (highlight) a cell, row or column
+        '''
         self._master.master.bind('<Button-1>', self.select_cell)
         self._master.master.bind('<Double-Button-1>', self.select_row)
         self._master.master.bind('<Triple-Button-1>', self.select_col)
 
     def create_cell(self, posx, posy):
+        '''
+        Create a cell and append it to the table cells array
+        '''
         cell = Cell(self._master, posx, posy)
         self.cells.append((cell, posx, posy))
 
     def create_table(self):
+        '''
+        Create all the cells
+        '''
         for row in range(self._row_number):
             for col in range(self._col_number):
                 self.create_cell(col, row)
 
     def get_cell(self, row, col):
+        '''
+        Giving a row and a col as arguments, it returns the cell in that position
+        '''
         return [t[0] for _, t in enumerate(self.cells) if t[1]==col and t[2]==row].pop()
 
-    def get_cell_line(self, n, type="ROW"):
+    def get_cell_line(self, n, line_type="ROW"):
+        '''
+        Returns an array of Cells
+        '''
         try:
-            if type=="ROW":
+            if line_type=="ROW":
                 return [t[0] for _, t in enumerate(self.cells) if t[2] == n]
-            if type=="COL":
+            if line_type=="COL":
                 return [t[0] for _, t in enumerate(self.cells) if t[1] == n]
         except:
             pass
 
     def find_widget(self, event):
+        '''
+        Returns the row and column of the frame where the mouse clicked
+        '''
         x = event.x_root - self._master.winfo_rootx() 
         y = event.y_root - self._master.winfo_rooty()
         (col, row) = self._master.grid_location(x,y)
@@ -58,13 +80,13 @@ class Table():
         row, col = self.find_widget(event)     
         return self.get_cell(row, col)
 
-    def find_cell_line(self, event, type="ROW"):
+    def find_cell_line(self, event, line_type="ROW"):
         row, col = self.find_widget(event)
         try:
-            if type=="ROW":
-                cell_line = Cell_Line (self._master, self.get_cell_line(row, type))
-            if type=="COL":
-                cell_line = Cell_Line (self._master, self.get_cell_line(col, type))
+            if line_type=="ROW":
+                cell_line = Cell_Line (self._master, self.get_cell_line(row, line_type))
+            if line_type=="COL":
+                cell_line = Cell_Line (self._master, self.get_cell_line(col, line_type))
             return cell_line
         except:
             pass
@@ -116,7 +138,7 @@ class Table():
 
     def select_col(self, event):
         try:
-            col = self.find_cell_line(event, type="COL")
+            col = self.find_cell_line(event, line_type="COL")
             if not isinstance(self.selected_line, Cell_Line):
                 self.focus_selected_line(col)
             elif self.selected_line == col:
@@ -126,9 +148,6 @@ class Table():
                 self.focus_selected_line(col)
         except:
             pass
-
-    '''
-    '''
 
     #TODO: Simplefy and generalize 'insert_headers'
     #############################
@@ -143,10 +162,13 @@ class Table():
     ##############################
     
 
-    def insert_cells(self, line, type="ROW"):
+    def insert_cells(self, line, line_type="ROW"):
+        '''
+        Insert a cell line (column or row) in the specified position
+        '''
         try:
-            if type == "ROW":
-                if 0 <= line < self._row_number:
+            if line_type == "ROW":
+                if 0 <= line <= self._row_number:
                     for (cell, col, row) in self.cells:
                         i = self.cells.index((cell, col, row))
                         if line <= row:
@@ -157,8 +179,8 @@ class Table():
                         self.create_cell(col, line)
                         self.get_cell(line, col).set_value(f"NEW ROW {line}")  
 
-            if type == "COL":
-                if 0 <= line < self._col_number:
+            if line_type == "COL":
+                if 0 <= line <= self._col_number:
                     for (cell, col, row) in self.cells:
                         i = self.cells.index((cell, col, row))
                         if line <= col:
@@ -172,11 +194,11 @@ class Table():
             pass
 
     def insert_row(self, pos):
-        self.insert_cells(pos, type="ROW")
+        self.insert_cells(pos, line_type="ROW")
         self._row_number += 1
 
     def insert_col(self, pos):
-        self.insert_cells(pos, type="COL")
+        self.insert_cells(pos, line_type="COL")
         self._col_number += 1
 
 class Cell(Entry):
@@ -250,12 +272,14 @@ def _test():
     root.title("Test")
     frame = Frame(root, padx=10, pady=10)
     table = Table(frame, 3, 4)
+    table.get_cell(2,2).set_value("HOLA")
     #print(table)
-    table.insert_row(0)
+    #table.insert_row(0)
     #print(table)
-    table.insert_col(1)
+    #table.insert_col(1)
     #print(table)
-    table.insert_row(3)
+    #table.insert_row(3)
+    #table.insert_col(4)
     #print(table)
     frame.pack()
 
