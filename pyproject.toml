@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "tktable"
+name = "tktabl"
 version = "0.1.0"
 description = "Python Tkinter Table complement"
 authors = ["Juan José Abuin <juanj.abuin@gmail.com>"]
