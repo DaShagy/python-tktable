@@ -12,6 +12,8 @@ $ pip install tktabl
 
 ## Usage
 
+### Import
+
 As tktable is a complement to tkinter, you must import it in your code:
 
 ```python
@@ -19,54 +21,101 @@ import tkinter as tk
 import tktabl
 ```
 
-A table needs a tkinter Frame as its master
+### Create a table
+
+Creating a table requires a tkinter root as an argument. This will create a
+default 5x4 table in its own tkinter frame.
+Note that the first row is a column headers row.
 
 ```python
 root = tk.Tk()
-frame = tk.Frame(root)
-table = tktable.Table(frame)
-frame.pack()
+table = tktable.Table(root)
+table.pack()
 ```
 
-By default, it creates a 4x4 table in the specified frame.
-You can also specify it size passing 2 additional arguments (col, row), e.g.
+You can specify it size passing 2 additional arguments (col, row), e.g.:
 
 ```python
 root = tk.Tk()
-frame = tk.Frame(root)
-table = tktable.Table(frame, col=3, row=5)
-frame.pack()
+table = tktable.Table(root, col=3, row=5)
+table.pack()
 ```
 
-Before you pack the frame, you can also set each cell value. To do that, you can access each cell
-with the 'get_cell()' method, passing it position (row, column) within the table. e.g.
+This will create a 6x3 table where the first row is a column headers row.
+
+You can pass a list of strings as column headers, e.g.:
 
 ```python
+
+headers = ["ID", "Name", "Age"]
+
 root = tk.Tk()
-frame = tk.Frame(root)
-table = tktable.Table(frame, col=3, row=5)
-my_cell = table.get_cell(2,2)
-frame.pack()
+table = tktable.Table(root, headers=headers)
+table.pack()
 ```
 
-Now, the my_cell variable is associated with the cell in the _third_ row and the _third_ column
+This will create a 5x3 table where the first row is the column headers row
+with the values "ID", "Name", and "Age" respectively
 
-You can set the value it displays with the Cell set_value(_"value"_) method.
+You can pass a list of dictionaries with the data you want to display, e.g.:
+
+```python
+
+data = [
+    {"ID": 1, "Name": "Juan", "Age": 24},
+    {"ID": 2, "Address": "5th 20-22"}
+]
+
+root = tk.Tk()
+table = tktable.Table(root, data=data)
+table.pack()
+```
+
+Note that not every dictionary has the same keys.
+This, will create a 4x3 table.
+First row will be a row with headers "ID", "Name", "Age" and "Address".
+Second row will be the data of the first dictionary.
+Third row will be the data of the second dictionary.
+(If the dictionary doesn't has any value in a given header, the corresponding
+cell will be left blank)
+
+Finally, you can mix all these arguments, e.g.:
 
 ```python
 ...
-table = tktable.Table(frame, col=3, row=5)
-my_cell = table.get_cell(2,2)
-my_cell.set_value("Hello World!")
-frame.pack()
+table = tktable.Table(root, row=5, headers=headers, data=data)
+table.pack()
 ```
 
-Now the cell will display the string "Hellow World!"
+In this case, it will create a table where there will be as many columns
+as headers in the headers variable plus the data variable without repeating themselves
 
-You can also get its value with the Cell get_value() method.
+After creating the table and before running your app, you must pack it with the Table.pack() function.
+
+### Usefull methods
+
+- Table.get_cell(row, column): will return a Cell object in the corresponding
+  row and column.
+
+- Table.get_data(): will return a list of dictionaries, as many as rows are in the table, ignoring
+  headers row, and each dictionary will have as many named keys as columns are in the table.
+
+- Table.get_row_data(row): will return a dictionary with as many keys as columns are in the table and
+  with values corresponding the number of row passed as argument (Row 0 is the first row **after** the
+  header row)
+
+- Cell.get_value(): will return the value displayed by the cell
+
+- Cell.set_value(value): Cell will display the value passed as argument
+
+### Some features
 
 Simple left click on a cell will highlight it.
 Double left click will highlight its row.
 Triple left click will highlight its column.
 
 Work in progress...
+
+## Changelog
+
+v 0.2.0[02/28/2021]: The table includes its own tkinter frame master. Added set and get data functions.

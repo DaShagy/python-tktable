@@ -1,19 +1,30 @@
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 from tkinter import *
 import numbers
 
 class Table():
-    def __init__(self, master, col=4, row=4):
+    def __init__(self, master, col=4, row=4, headers=[], data=None):
         '''
-        Create a table instance, passing it master (a tkinter Frame), number of columns and number of rows
+        Create a table instance, passing it master (root), number of columns and number of rows
         as arguments
         '''
 
         self._master = Frame(master, padx=10, pady=10)
 
+        self.headers = []
+
         self._row_number = row
         self._col_number = col
+
+        if data:
+            try:
+                self.set_table_data(data)
+            except:
+                pass
+        elif headers:
+            self.set_table_headers(headers)
+
 
         self.cells = []
 
@@ -23,7 +34,13 @@ class Table():
         self.bind_mouse_button()
         self.create_table()
 
+        if data:
+            self.set_data(data)
+
     def pack(self):
+        '''
+        Pack the table
+        '''
         self._master.pack()
 
     def __str__(self) -> str:
@@ -37,17 +54,31 @@ class Table():
         self._master.master.bind('<Double-Button-1>', self.select_row)
         self._master.master.bind('<Triple-Button-1>', self.select_col)
 
-    def create_cell(self, posx, posy):
+    def create_cell(self, col, row, value=None):
         '''
         Create a cell and append it to the table cells array
         '''
-        cell = Cell(self._master, posx, posy)
-        self.cells.append((cell, posx, posy))
+        cell = Cell(self._master, col, row+1)
+        if value:
+            cell.set_value(value)
+        self.cells.append((cell, col, row+1))
+
+    def create_headers_row(self):
+        if not self.headers:
+            for col in range(self._col_number):
+                self.create_cell(col, -1, f"COL {col}")
+        else:
+            for col, header in zip(range(self._col_number), self.headers):
+                self.create_cell(col, -1, header)
+        header_row = self.get_cell_line(0)
+        for cell in header_row:
+            cell.config(justify=CENTER)
 
     def create_table(self):
         '''
         Create all the cells
         '''
+        self.create_headers_row()
         for row in range(self._row_number):
             for col in range(self._col_number):
                 self.create_cell(col, row)
@@ -150,22 +181,9 @@ class Table():
                 self.unfocus_selected_line()
                 self.focus_selected_line(col)
         except:
-            pass
+            pass    
 
-    #TODO: Simplefy and generalize 'insert_headers'
-    #############################
-
-    def insert_headers(self, data):
-        headers = [*data.keys()]
-        print(headers)
-        header_row = self.get_row(0, 0)
-        for cell, key in zip(header_row.get_cells(), headers):
-            cell.set_value(key)
-
-    ##############################
-    
-
-    def insert_cells(self, line, line_type="ROW"):
+    def insert_cells(self, line, line_type="ROW", header=None):
         '''
         Insert a cell line (column or row) in the specified position
         '''
@@ -190,9 +208,19 @@ class Table():
                             x, _ = cell.get_pos()
                             cell.set_pos(x+1, row)
                             self.cells[i] = (cell, x+1, row)
+
+                    if header:
+                        self.create_cell(line, -1, header)
+                        self.headers.insert(line, header)
+                    else:
+                        self.create_cell(line, -1, "New column")
+
+                    new_col_header = self.get_cell(0, line)
+                    new_col_header.config(justify=CENTER)
+
                     for row in range(self._row_number):
-                        self.create_cell(line, row)
-                        self.get_cell(row, line).set_value(f"NEW COL {line}")                 
+                        self.create_cell(line, row)            
+
         except:
             pass
 
@@ -200,9 +228,59 @@ class Table():
         self.insert_cells(pos, line_type="ROW")
         self._row_number += 1
 
-    def insert_col(self, pos):
-        self.insert_cells(pos, line_type="COL")
-        self._col_number += 1
+    def insert_col(self, pos, header=None):
+        if header not in self.headers:
+            self.insert_cells(pos, line_type="COL", header=header)
+            self._col_number += 1
+
+    def set_table_headers(self, headers):
+        for h in headers:
+            self.headers.append(h)
+        self._col_number = len(self.headers)
+
+    def set_table_data(self, data):
+        for d in data:
+            keys = d.keys()
+            for k in keys:
+                if k not in self.headers:
+                    self.headers.append(k)
+        self._row_number = len(data)
+        self._col_number = len(self.headers)
+
+    def set_data(self, data):
+        for h in self.headers:
+            col = self.headers.index(h)
+            for d in data:
+                for key in d.keys():
+                    if key not in self.headers:
+                        self.insert_col(self._col_number, key)
+                row = data.index(d) + 1
+                if h in d.keys():
+                    pass
+                    self.get_cell(row, col).set_value(d[h])
+                #if h not in d.keys():
+                #    self.insert_col(1, h)
+                #else:
+                #    self.get_cell(row, col).set_value(d[h])
+               
+    def get_row_data(self, row):
+        '''
+        Returns a dictionary where the keys are the table headers and its values are the correspondent cell
+        '''
+        d = {}
+        row_cells = self.get_cell_line(row+1)
+        for cell, header in zip(row_cells, self.headers):
+            d.setdefault(header, cell.get_value())
+        return d
+
+    def get_table_data(self):
+        '''
+        Returns a list of dictionaries with all the values in the table
+        '''
+        data = []
+        for row in range(self._row_number):
+            data.append(self.get_row_data(row))
+        return data
 
 class Cell(Entry):
     def __init__(self, master, posx=0, posy=0):
@@ -212,8 +290,15 @@ class Cell(Entry):
         self._pos = (posx, posy)
 
         self.grid(column=posx, row=posy)
-        self.config(state="readonly", readonlybackground="white", textvariable=self._value, cursor="arrow")
-        self.set_value(f"{posx},{posy}")
+        self.config(
+            state="readonly", 
+            readonlybackground="white", 
+            textvariable=self._value, 
+            cursor="arrow", 
+            exportselection=0,
+            selectbackground="light blue",
+            selectforeground="black"
+        )
 
     def focus_cell(self):
         self.config(readonlybackground="lightblue")
@@ -270,24 +355,16 @@ class Cell_Line():
 #Test
 
 def _test():
-    d = {"Name": "Juan", "Age": 24}
+    d = [
+        {"Name": "Juan", "Age": 24},
+        {"Age": 33, "Address": "Monteagudo 1175"},
+        ]
+    h = ["Name", "Age", "ID"]
     root = Tk()
     root.title("Test")
-    table = Table(root, 3, 4)
-    #table.get_cell(2,2).set_value("HOLA")
-    #print(table)
-    #table.insert_row(0)
-    #print(table)
-    #table.insert_col(1)
-    #print(table)
-    #table.insert_row(3)
-    #table.insert_col(4)
-    #print(table)
+    table = Table(root)
+    table.set_table_data(d)
     table.pack()
-
-    
-
-    #print(table.get_column(0).get_cell(3))
 
     root.mainloop()
 
