@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "tktabl"
-version = "0.1.0"
+version = "0.1.01"
 description = "Python Tkinter Table complement"
 authors = ["Juan José Abuin <juanj.abuin@gmail.com>"]
 license = "MIT"
+readme = "README.md"
 homepage = "https://github.com/DaShagy/python-tktable"
 repository = "https://github.com/DaShagy/python-tktable"
 keywords = ["tkinter", "complement", "gui"]

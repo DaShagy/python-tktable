@@ -6,8 +6,8 @@ This proyect intends to be a complement on managing tables within the Python Tki
 
 Run the following to install:
 
-```python
-pip install tktabl
+```shell
+$ pip install tktabl
 ```
 
 ## Usage
