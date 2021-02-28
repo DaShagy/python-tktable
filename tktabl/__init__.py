@@ -10,7 +10,7 @@ class Table():
         as arguments
         '''
 
-        self._master = master
+        self._master = Frame(master, padx=10, pady=10)
 
         self._row_number = row
         self._col_number = col
@@ -22,6 +22,9 @@ class Table():
 
         self.bind_mouse_button()
         self.create_table()
+
+    def pack(self):
+        self._master.pack()
 
     def __str__(self) -> str:
         return f"Rows: {self._row_number}, Cols: {self._col_number}\n{self.cells}"
@@ -152,12 +155,12 @@ class Table():
     #TODO: Simplefy and generalize 'insert_headers'
     #############################
 
-    #def insert_headers(self, data):
-    #    headers = [*data.keys()]
-    #    print(headers)
-    #    header_row = self.get_row(0, 0)
-    #    for cell, key in zip(header_row.get_cells(), headers):
-    #        cell.set_value(key)
+    def insert_headers(self, data):
+        headers = [*data.keys()]
+        print(headers)
+        header_row = self.get_row(0, 0)
+        for cell, key in zip(header_row.get_cells(), headers):
+            cell.set_value(key)
 
     ##############################
     
@@ -168,7 +171,7 @@ class Table():
         '''
         try:
             if line_type == "ROW":
-                if 0 <= line <= self._row_number:
+                if 0 < line <= self._row_number:
                     for (cell, col, row) in self.cells:
                         i = self.cells.index((cell, col, row))
                         if line <= row:
@@ -270,9 +273,8 @@ def _test():
     d = {"Name": "Juan", "Age": 24}
     root = Tk()
     root.title("Test")
-    frame = Frame(root, padx=10, pady=10)
-    table = Table(frame, 3, 4)
-    table.get_cell(2,2).set_value("HOLA")
+    table = Table(root, 3, 4)
+    #table.get_cell(2,2).set_value("HOLA")
     #print(table)
     #table.insert_row(0)
     #print(table)
@@ -281,7 +283,7 @@ def _test():
     #table.insert_row(3)
     #table.insert_col(4)
     #print(table)
-    frame.pack()
+    table.pack()
 
     
 
