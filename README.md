@@ -49,9 +49,9 @@ my_cell = table.get_cell(2,2)
 frame.pack()
 ```
 
-Now, the my*cell variable is associated with the cell in the \_third* row and the _third_ column
+Now, the my_cell variable is associated with the cell in the _third_ row and the _third_ column
 
-You can set the value it displays with the Cell set*value(*"value"\_) method.
+You can set the value it displays with the Cell set_value(_"value"_) method.
 
 ```python
 ...
